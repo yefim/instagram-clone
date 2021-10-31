@@ -7,4 +7,6 @@ const sequelize = new Sequelize({
   benchmark: true,
 });
 
+require('./models/user')(sequelize);
+
 module.exports = sequelize;

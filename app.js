@@ -3,8 +3,15 @@ const db = require('./db');
 
 const app = express();
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  // await db.models.user.create({username: 'test123'});
+
   res.send('hello test');
+});
+
+app.get('/users', async (req, res) => {
+  const users = await db.models.user.findAll();
+  res.status(200).json(users);
 });
 
 async function main() {
