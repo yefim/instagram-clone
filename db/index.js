@@ -8,5 +8,6 @@ const sequelize = new Sequelize({
 });
 
 require('./models/user')(sequelize);
+require('./models/post')(sequelize);
 
 module.exports = sequelize;

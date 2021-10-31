@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Instagram - Home</title>
+  </head>
+  <body>
+    <form method="POST" action="/post" enctype="multipart/form-data">
+      <input type="file" name="photo">
+      <input type="text" name="caption">
+      <button type="submit">Post</button>
+    </form>
+    <div class="posts">
+      <% posts.forEach((post) => { %>
+        <img height="200" src="<%= post.photoUrl %>">
+        <p><%= post.caption %></p>
+      <% }) %>
+    </div>
+  </body>
+</html>
