@@ -5,7 +5,8 @@ const FormData = require('form-data');
 const multer = require('multer');
 const passport = require('passport');
 const TwitterStrategy = require('passport-twitter').Strategy;
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+const path = require('path');
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 const db = require('./db');
 
@@ -42,6 +43,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(require('express-session')({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
 async function uploadPhoto(path) {
@@ -71,7 +73,7 @@ async function uploadPhoto(path) {
   return link;
 }
 
-app.get('/', ensureLoggedIn(), async (req, res) => {
+app.get('/', /* ensureLoggedIn(), */ async (req, res) => {
   // await db.models.user.create({username: 'test123'});
 
   // res.send('hello test');
