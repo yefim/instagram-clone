@@ -3,13 +3,45 @@ const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const multer = require('multer');
+const passport = require('passport');
+const TwitterStrategy = require('passport-twitter').Strategy;
+var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 const db = require('./db');
+
+passport.use(new TwitterStrategy({
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    callbackURL: "https://55e5-2a00-79e1-abc-1a12-c8cc-3ebf-30bb-906d.ngrok.io/auth/twitter/callback"
+  },
+  function(token, tokenSecret, profile, done) {
+    console.log(profile.id);
+
+    done(null, profile);
+    /*
+    User.findOrCreate(..., function(err, user) {
+      if (err) { return done(err); }
+      done(null, user);
+    });
+    */
+  }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
 
 const upload = multer({dest: 'uploads/'});
 const app = express();
 
 app.use(express.urlencoded({extended: true}));
+app.use(require('express-session')({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.set('view engine', 'ejs');
 
 async function uploadPhoto(path) {
@@ -39,13 +71,17 @@ async function uploadPhoto(path) {
   return link;
 }
 
-app.get('/', async (req, res) => {
+app.get('/', ensureLoggedIn(), async (req, res) => {
   // await db.models.user.create({username: 'test123'});
 
   // res.send('hello test');
   const posts = await db.models.post.findAll();
 
   res.render('index', {posts});
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
 });
 
 app.get('/users', async (req, res) => {
@@ -66,6 +102,12 @@ app.post('/post', upload.single('photo'), async (req, res) => {
 
   res.redirect('/');
 });
+
+app.get('/auth/twitter', passport.authenticate('twitter'));
+
+app.get('/auth/twitter/callback',
+  passport.authenticate('twitter', { successRedirect: '/',
+                                     failureRedirect: '/login' }));
 
 async function main() {
   await db.authenticate();
